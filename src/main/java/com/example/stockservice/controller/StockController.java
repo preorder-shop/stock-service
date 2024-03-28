@@ -19,14 +19,14 @@ public class StockController {
     /**
      * 상품 재고 수량 조회
      */
-    @GetMapping("/{productId}")
-    public ResponseEntity<GetStockRes> getProductStock(@PathVariable(name = "productId") String productId){
-
-        GetStockRes result = stockService.getStock(productId);
-
-        return ResponseEntity.ok().body(result);
-
-    }
+//    @GetMapping("/{productId}")
+//    public ResponseEntity<GetStockRes> getProductStock(@PathVariable(name = "productId") String productId){
+//
+//        GetStockRes result = stockService.getStock(productId);
+//
+//        return ResponseEntity.ok().body(result);
+//
+//    }
 
     @GetMapping("/update")
     public ResponseEntity<String> updatePreOrderProductStockInRedis(){

@@ -6,5 +6,5 @@ import lombok.Setter;
 
 @AllArgsConstructor
 public class StockRes {
-    private Long stock;
+    private int stock;
 }

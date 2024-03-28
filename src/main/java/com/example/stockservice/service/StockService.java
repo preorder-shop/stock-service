@@ -3,10 +3,12 @@ package com.example.stockservice.service;
 import static com.example.stockservice.common.response.BaseResponseStatus.STOCK_NOT_FOUND;
 
 import com.example.stockservice.common.exceptions.BaseException;
+import com.example.stockservice.domain.ProductType;
 import com.example.stockservice.domain.dto.DecreaseStockReq;
 import com.example.stockservice.domain.dto.IncreaseStockReq;
+import com.example.stockservice.domain.dto.StockDto;
 import com.example.stockservice.domain.entity.Stock;
-import com.example.stockservice.domain.dto.CreateProductStockReq;
+import com.example.stockservice.domain.dto.PostStockReq;
 import com.example.stockservice.domain.dto.GetStockRes;
 import com.example.stockservice.repository.StockRedisRepository;
 import com.example.stockservice.repository.StockRepository;
@@ -20,43 +22,55 @@ public class StockService {
     private final StockRepository stockRepository;
     private final StockRedisRepository stockRedisRepository;
 
-    public GetStockRes getStock(String productId) { // 실시간 재고 가져옴.
-
-        // todo : redis 에 있으면 redis 에서 가져오고
-        // 없으면 db에서 조회
-
-        Stock stockInDB = stockRepository.findByProductId(productId)
-                .orElseThrow(()-> new BaseException(STOCK_NOT_FOUND));
-
-
-        int quantity = stockInDB.getQuantity();
-        GetStockRes getStockRes = new GetStockRes(productId,quantity);
-
-
-    }
-
-    public void createProductStock(CreateProductStockReq createProductStockReq) {
-
+    public void createProductStock(PostStockReq postStockReq) {
         Stock stock = Stock.builder()
-                .productId(createProductStockReq.getProductId())
-                .productType(createProductStockReq.getProductType())
-                .quantity(createProductStockReq.getStock())
+                .productId(postStockReq.getProductId())
+                .productType(postStockReq.getProductType())
+                .quantity(postStockReq.getStock())
                 .build();
 
         stockRepository.save(stock);
     }
 
-    public Long decreaseStock(DecreaseStockReq decreaseStockReq) {
-        Long remainStock = stockRedisRepository.decreaseOne(decreaseStockReq.getProductId());
+    public int decreaseStock(DecreaseStockReq decreaseStockReq) {
+        int remainStock = stockRedisRepository.decreaseOne(decreaseStockReq.getProductId());
         return remainStock;
     }
 
-    public Long increaseStock(IncreaseStockReq increaseStockReq){
-        Long remainStock = stockRedisRepository.increaseOne(increaseStockReq.getProductId());
+    public int increaseStock(IncreaseStockReq increaseStockReq){
+        int remainStock = stockRedisRepository.increaseOne(increaseStockReq.getProductId());
         return remainStock;
     }
 
     public void updatePreOrderProductStockInRedis() {
         stockRedisRepository.initStockInfo();
+    }
+
+    public StockDto getProductStock(String productId) {
+        Stock stock = stockRepository.findByProductId(productId)
+                .orElseThrow(() -> new BaseException(STOCK_NOT_FOUND));
+
+        ProductType productType = stock.getProductType();
+
+        // 일반 상품의 경우
+        if(productType.equals(ProductType.GENERAL)){
+            return new StockDto(stock.getProductId(),stock.getQuantity());
+        }
+        // 예약 상품의 경우
+        StockDto preOrderProductStock = getPreOrderProductStock(productId);
+        if(preOrderProductStock==null){
+            return new StockDto(productId,stock.getQuantity());
+        }
+        return preOrderProductStock;
+
+    }
+
+    private StockDto getPreOrderProductStock(String productId){
+        Integer stock = stockRedisRepository.getStock(productId);
+        if(stock==null){
+            return null;
+        }
+        return new StockDto(productId,stock);
+
     }
 }

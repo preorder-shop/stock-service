@@ -24,16 +24,22 @@ public class StockRedisRepository {
         redisTemplate.opsForValue().set(productNumber, String.valueOf(quantity));
     }
 
-    public int getStock(String productNumber){
+    public Integer getStock(String productNumber){ // 상품 재고 가져옴
         String quantity = redisTemplate.opsForValue().get(productNumber);
-        return quantity!=null?Integer.parseInt(quantity):0;
+        // 재고가 null 이면 redis에 정보가 없으므로 db에서 조회함
+
+        if(quantity==null)
+            return null;
+      //  return quantity!=null?Integer.parseInt(quantity):0;
+
+        return Integer.parseInt(quantity);
     }
 
-    public Long increaseOne(String productId) { // 수량 + 1
-        return redisTemplate.opsForValue().increment(productId);
+    public int increaseOne(String productId) { // 수량 + 1
+        return Math.toIntExact(redisTemplate.opsForValue().increment(productId));
     }
 
-   public Long decreaseOne(String productId){ // 수량 - 1
+   public int decreaseOne(String productId){ // 수량 - 1
 
        Integer decrement = Math.toIntExact(redisTemplate.opsForValue().decrement(productId));
 
