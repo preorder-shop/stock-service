@@ -32,14 +32,15 @@ public class StockService {
         stockRepository.save(stock);
     }
 
-    public int decreaseStock(DecreaseStockReq decreaseStockReq) {
-        int remainStock = stockRedisRepository.decreaseOne(decreaseStockReq.getProductId());
-        return remainStock;
+    public StockDto decreaseStock(String productId) {
+        int remainStock = stockRedisRepository.decreaseOne(productId);
+
+        return new StockDto(productId,remainStock);
     }
 
-    public int increaseStock(IncreaseStockReq increaseStockReq){
-        int remainStock = stockRedisRepository.increaseOne(increaseStockReq.getProductId());
-        return remainStock;
+    public StockDto increaseStock(String productId){
+        int remainStock = stockRedisRepository.increaseOne(productId);
+        return new StockDto(productId,remainStock);
     }
 
     public void updatePreOrderProductStockInRedis() {

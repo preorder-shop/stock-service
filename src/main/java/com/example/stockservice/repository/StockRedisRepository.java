@@ -43,12 +43,6 @@ public class StockRedisRepository {
 
        Integer decrement = Math.toIntExact(redisTemplate.opsForValue().decrement(productId));
 
-       if(decrement==0){
-           Stock stock = stockRepository.findByProductId(productId)
-                   .orElseThrow(() -> new IllegalStateException("유효하지 않은 상품 번호입니다."));
-           stock.updateStock(0);
-       }
-
        if(decrement<0){
            log.error("재고는 음수가 될 수 없습니다. : {}",decrement);
            throw new BaseException(UNEXPECTED_ERROR);

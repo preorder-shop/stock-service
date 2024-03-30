@@ -27,40 +27,39 @@ public class InternalController {
      * 새로 생성된 상품의 재고 수량 정보 update
      */
     @PostMapping("/new")
-    public void postStock(@RequestBody PostStockReq postStockReq){
+    public void postStock(@RequestBody PostStockReq postStockReq) {
 
         stockService.createProductStock(postStockReq);
 
     }
 
     @GetMapping("/{productId}")
-    public StockDto getProductStock(@PathVariable("productId") String productId){
+    public StockDto getProductStock(@PathVariable("productId") String productId) {
 
-       StockDto stock = stockService.getProductStock(productId);
+        StockDto stock = stockService.getProductStock(productId);
 
-       return stock;
+        return stock;
 
     }
-//
-//    /**
-//     * 재고 수량 감소
-//     */
-//    @PostMapping("/decrease")
-//    public StockRes decreaseStock(@RequestBody DecreaseStockReq decreaseStockReq){
-//
-//        int stock = stockService.decreaseStock(decreaseStockReq);
-//
-//        return new StockRes(stock);
-//
-//
-//    }
-//
-//    @PostMapping("/decrease")
-//    public StockRes increaseStock(@RequestBody DecreaseStockReq decreaseStockReq){
-//
-//        int stock = stockService.decreaseStock(decreaseStockReq);
-//
-//        return new StockRes(stock);
-//
-//    }
+
+    /**
+     * 재고 수량 감소
+     */
+    @GetMapping("/decrease/{productId}")
+    public StockDto decreaseStock(@PathVariable("productId") String productId){
+        log.info("StockService > InternalController > decreaseStock");
+        StockDto stock = stockService.decreaseStock(productId);
+        log.info("decreaseStock 결과 : {}",stock.getStock());
+        return stock;
+
+    }
+
+    @GetMapping("/increase/{productId}")
+    public StockDto increaseStock(@PathVariable("productId") String productId){
+        log.info("StockService > InternalController > increaseStock");
+        StockDto stock = stockService.increaseStock(productId);
+        log.info("increaseStock 결과 : {}",stock.getStock());
+        return stock;
+
+    }
 }
